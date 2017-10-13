@@ -45,6 +45,8 @@ class ReqyTest extends TestCase
             'foo' => $this->req->equals('barz')
         ]);
         self::assertNotEmpty($errors);
+        self::assertEquals('foo', $errors[0]->getKey());
+        self::assertEquals('expected <barz>, but got <bar>', $errors[0]->getDetails());
     }
 
     public function testEqualsPreprocess()
@@ -71,6 +73,8 @@ class ReqyTest extends TestCase
             'foo' => $this->req->exists()
         ]);
         self::assertNotEmpty($errors);
+        self::assertEquals('foo', $errors[0]->getKey());
+        self::assertEquals('expected field to exist', $errors[0]->getDetails());
     }
 
     public function testExistsPreprocess()
@@ -96,6 +100,16 @@ class ReqyTest extends TestCase
             'numbers' => $this->req->every($this->req->odd())
         ]);
         self::assertNotEmpty($errors);
+        $expected = "error at index 1, expected <50> to be odd";
+        self::assertEquals($expected, $errors[0]->getDetails());
+
+        $errors = $this->req->validate(['numbers' => [1, 50, 100]], [
+            'numbers' => $this->req->every($this->req->odd())
+        ]);
+        self::assertNotEmpty($errors);
+        self::assertEquals('numbers', $errors[0]->getKey());
+        $expected = "errors at indices 1, 2:\n[1] expected <50> to be odd\n[2] expected <100> to be odd";
+        self::assertEquals($expected, $errors[0]->getDetails());
     }
 
     public function testRange() {
@@ -108,6 +122,8 @@ class ReqyTest extends TestCase
             'cost' => $this->req->range(0, 10)
         ]);
         self::assertNotEmpty($errors);
+        self::assertEquals('cost', $errors[0]->getKey());
+        self::assertEquals('expected <100> to be in range (0, 10)', $errors[0]->getDetails());
     }
 
     public function testReqsOnSubObject() {
@@ -137,6 +153,8 @@ class ReqyTest extends TestCase
             ]
         ]);
         self::assertNotEmpty($errors);
+        self::assertEquals('job.canHeFixIt', $errors[0]->getKey());
+        self::assertEquals("expected <no he can't>, but got <yes he can>", $errors[0]->getDetails());
     }
 
     public function testPreprocessReqsOnSubObject()

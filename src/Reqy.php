@@ -4,6 +4,18 @@ namespace Reqy;
 
 class Reqy
 {
+    /** @var ReqyErrorLevel */
+    protected $defaultErrorLevel;
+
+    /**
+     * Reqy constructor.
+     * @param ReqyErrorLevel $defaultErrorLevel
+     */
+    public function __construct(ReqyErrorLevel $defaultErrorLevel = null)
+    {
+        $this->defaultErrorLevel = $defaultErrorLevel ?? ReqyErrorLevel::$ERROR;
+    }
+
     /**
      * @param array $args
      * @param array $types
@@ -27,9 +39,9 @@ class Reqy
      */
     public function exists(ReqyErrorLevel $level = null)
     {
-        $level = $level ?? ReqyErrorLevel::$ERROR;
+        $level = $level ?? $this->defaultErrorLevel;
         return new Validator('exists', $level, function ($value) {
-            return $value !== null;
+            return $value !== null ?: "expected field to exist";
         });
     }
 
@@ -41,7 +53,7 @@ class Reqy
     {
         if (func_num_args() === 1) {
             list($expected) = func_get_args();
-            $level = ReqyErrorLevel::$ERROR;
+            $level = $this->defaultErrorLevel;
         } elseif (func_num_args() === 2) {
             $this->typeCheck(func_get_args(), [ReqyErrorLevel::class, '*']);
             list($level, $expected) = func_get_args();
@@ -62,14 +74,30 @@ class Reqy
     {
         $name = "every <{$validator->getName()}>";
         return new Validator($name, $validator->getLevel(), function ($values) use ($validator) {
-            $errorDetails = [];
-            foreach ($values as $value) {
+            $errorLines = [];
+            foreach ($values as $i => $value) {
                 $result = $validator->getPredicate()($value);
                 if ($result !== true) {
-                    $errorDetails[] = $result;
+                    $errorLines[$i] = $result;
                 }
             }
-            return empty($errorDetails) ?: join("\n", $errorDetails);
+
+            if (empty($errorLines)) {
+                return true;
+            }
+
+            if (count($errorLines) === 1) {
+                $index = array_keys($errorLines)[0];
+                $error = $errorLines[$index];
+                return "error at index {$index}, {$error}";
+            }
+
+            $indicesListed = join(', ', array_keys($errorLines));
+            $errorsListed = array_map(function ($i, $value) {
+                return "[$i] $value";
+            }, array_keys($errorLines), $errorLines);
+
+            return "errors at indices $indicesListed:\n" . join("\n", $errorsListed);
         });
     }
 
@@ -79,7 +107,7 @@ class Reqy
      */
     public function odd(ReqyErrorLevel $level = null)
     {
-        $level = $level ?? ReqyErrorLevel::$ERROR;
+        $level = $level ?? $this->defaultErrorLevel;
         return new Validator('odd', $level, function ($value) {
             return $value % 2 === 1 ?: "expected <$value> to be odd";
         });
@@ -91,7 +119,7 @@ class Reqy
      */
     public function even(ReqyErrorLevel $level = null)
     {
-        $level = $level ?? ReqyErrorLevel::$ERROR;
+        $level = $level ?? $this->defaultErrorLevel;
         return new Validator('even', $level, function ($value) {
             return $value % 2 === 0 ?: "expected <$value> to be even";
         });
@@ -106,7 +134,7 @@ class Reqy
         if (func_num_args() === 2) {
             $this->typeCheck(func_get_args(), ['integer', 'integer']);
             list($min, $max) = func_get_args();
-            $level = ReqyErrorLevel::$ERROR;
+            $level = $this->defaultErrorLevel;
         } elseif (func_num_args() === 3) {
             $this->typeCheck(func_get_args(), [ReqyErrorLevel::class, 'int', 'int']);
             list($level, $min, $max) = func_get_args();
@@ -198,5 +226,21 @@ class Reqy
         } else {
             return null;
         }
+    }
+
+    /**
+     * @return ReqyErrorLevel
+     */
+    public function getDefaultErrorLevel(): ReqyErrorLevel
+    {
+        return $this->defaultErrorLevel;
+    }
+
+    /**
+     * @param ReqyErrorLevel $defaultErrorLevel
+     */
+    public function setDefaultErrorLevel(ReqyErrorLevel $defaultErrorLevel)
+    {
+        $this->defaultErrorLevel = $defaultErrorLevel;
     }
 }
