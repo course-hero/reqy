@@ -31,6 +31,62 @@ class ReqyTest extends TestCase
         self::assertEmpty($errors);
     }
 
+    public function testExists()
+    {
+        $errors = $this->req->validate(['foo' => 'bar'], [
+            'foo' => $this->req->exists()
+        ]);
+        self::assertEmpty($errors);
+
+        $errors = $this->req->validate([], [
+            'foo' => $this->req->exists()
+        ]);
+        self::assertNotEmpty($errors);
+        self::assertEquals('foo', $errors[0]->getKey());
+        self::assertEquals('expected field to exist', $errors[0]->getDetails());
+    }
+
+    public function testExistsPreprocess()
+    {
+        $reqs = [
+            'foo'
+        ];
+        $expected = [
+            'foo' => $this->req->exists()
+        ];
+
+        $this->req->preprocess($reqs);
+        self::assertEquals($expected, $reqs);
+    }
+
+    public function testNotEmpty()
+    {
+        $errors = $this->req->validate(['foo' => 'bar'], [
+            'foo' => $this->req->notEmpty()
+        ]);
+        self::assertEmpty($errors);
+
+        $errors = $this->req->validate(['foo' => ''], [
+            'foo' => $this->req->notEmpty()
+        ]);
+        self::assertNotEmpty($errors);
+        self::assertEquals('foo', $errors[0]->getKey());
+        self::assertEquals('expected field to be non-empty', $errors[0]->getDetails());
+
+
+        $errors = $this->req->validate(['foo' => [1]], [
+            'foo' => $this->req->notEmpty()
+        ]);
+        self::assertEmpty($errors);
+
+        $errors = $this->req->validate(['foo' => []], [
+            'foo' => $this->req->notEmpty()
+        ]);
+        self::assertNotEmpty($errors);
+        self::assertEquals('foo', $errors[0]->getKey());
+        self::assertEquals('expected field to be non-empty', $errors[0]->getDetails());
+    }
+
     public function testEquals()
     {
         $object = [
@@ -62,57 +118,57 @@ class ReqyTest extends TestCase
         self::assertEquals($expected, $reqs);
     }
 
-    public function testExists()
+    public function testIn()
     {
-        $errors = $this->req->validate(['foo' => 'bar'], [
-            'foo' => $this->req->exists()
+        $object = [
+            'foo' => 2
+        ];
+        $errors = $this->req->validate($object, [
+            'foo' => $this->req->in([1, 2, 3])
         ]);
         self::assertEmpty($errors);
 
-        $errors = $this->req->validate([], [
-            'foo' => $this->req->exists()
+
+        $errors = $this->req->validate($object, [
+            'foo' => $this->req->in([1, 3, 5])
         ]);
         self::assertNotEmpty($errors);
         self::assertEquals('foo', $errors[0]->getKey());
-        self::assertEquals('expected field to exist', $errors[0]->getDetails());
+        self::assertEquals('expected <2> to be in array [1,3,5]', $errors[0]->getDetails());
     }
 
-    public function testExistsPreprocess()
+    public function testEven()
     {
-        $reqs = [
-            'foo'
-        ];
-        $expected = [
-            'foo' => $this->req->exists()
-        ];
-
-        $this->req->preprocess($reqs);
-        self::assertEquals($expected, $reqs);
-    }
-
-    public function testEvery() {
-        $errors = $this->req->validate(['numbers' => [1, 5, 11]], [
-            'numbers' => $this->req->every($this->req->odd())
+        $errors = $this->req->validate(['foo' => 2], [
+            'foo' => $this->req->even()
         ]);
         self::assertEmpty($errors);
 
-        $errors = $this->req->validate(['numbers' => [1, 50, 11]], [
-            'numbers' => $this->req->every($this->req->odd())
+        $errors = $this->req->validate(['foo' => 3], [
+            'foo' => $this->req->even()
         ]);
         self::assertNotEmpty($errors);
-        $expected = "error at index 1, expected <50> to be odd";
-        self::assertEquals($expected, $errors[0]->getDetails());
-
-        $errors = $this->req->validate(['numbers' => [1, 50, 100]], [
-            'numbers' => $this->req->every($this->req->odd())
-        ]);
-        self::assertNotEmpty($errors);
-        self::assertEquals('numbers', $errors[0]->getKey());
-        $expected = "errors at indices 1, 2:\n[1] expected <50> to be odd\n[2] expected <100> to be odd";
-        self::assertEquals($expected, $errors[0]->getDetails());
+        self::assertEquals('foo', $errors[0]->getKey());
+        self::assertEquals('expected 3 to be even', $errors[0]->getDetails());
     }
 
-    public function testRange() {
+    public function testOdd()
+    {
+        $errors = $this->req->validate(['foo' => 3], [
+            'foo' => $this->req->odd()
+        ]);
+        self::assertEmpty($errors);
+
+        $errors = $this->req->validate(['foo' => 2], [
+            'foo' => $this->req->odd()
+        ]);
+        self::assertNotEmpty($errors);
+        self::assertEquals('foo', $errors[0]->getKey());
+        self::assertEquals('expected 2 to be odd', $errors[0]->getDetails());
+    }
+
+    public function testRange()
+    {
         $errors = $this->req->validate(['cost' => 100], [
             'cost' => $this->req->range(0, 200)
         ]);
@@ -123,10 +179,139 @@ class ReqyTest extends TestCase
         ]);
         self::assertNotEmpty($errors);
         self::assertEquals('cost', $errors[0]->getKey());
-        self::assertEquals('expected <100> to be in range (0, 10)', $errors[0]->getDetails());
+        self::assertEquals('expected value to be in range (0, 10), but got 100', $errors[0]->getDetails());
     }
 
-    public function testReqsOnSubObject() {
+    public function testLength()
+    {
+        $object = [
+            'foo' => 'bar'
+        ];
+        $errors = $this->req->validate($object, [
+            'foo' => $this->req->length(3)
+        ]);
+        self::assertEmpty($errors);
+
+        $errors = $this->req->validate($object, [
+            'foo' => $this->req->length(2)
+        ]);
+        self::assertNotEmpty($errors);
+        self::assertEquals('foo', $errors[0]->getKey());
+        self::assertEquals('expected length to be 2, but got 3', $errors[0]->getDetails());
+
+        $object = [
+            'foo' => [1, 2, 3]
+        ];
+        $errors = $this->req->validate($object, [
+            'foo' => $this->req->length(3)
+        ]);
+        self::assertEmpty($errors);
+
+        $errors = $this->req->validate($object, [
+            'foo' => $this->req->length(2)
+        ]);
+        self::assertNotEmpty($errors);
+        self::assertEquals('foo', $errors[0]->getKey());
+        self::assertEquals('expected length to be 2, but got 3', $errors[0]->getDetails());
+    }
+
+    public function testLengthRange()
+    {
+        $object = [
+            'foo' => 'bar'
+        ];
+
+        $errors = $this->req->validate($object, [
+            'foo' => $this->req->lengthRange(1, 4)
+        ]);
+        self::assertEmpty($errors);
+
+        $errors = $this->req->validate($object, [
+            'foo' => $this->req->lengthRange(5, 10)
+        ]);
+        self::assertNotEmpty($errors);
+        self::assertEquals('foo', $errors[0]->getKey());
+        self::assertEquals('expected length to be in range (5, 10), but got 3', $errors[0]->getDetails());
+
+        $object = [
+            'foo' => [1, 2, 3]
+        ];
+
+        $errors = $this->req->validate($object, [
+            'foo' => $this->req->lengthRange(1, 4)
+        ]);
+        self::assertEmpty($errors);
+
+        $errors = $this->req->validate($object, [
+            'foo' => $this->req->lengthRange(5, 10)
+        ]);
+        self::assertNotEmpty($errors);
+        self::assertEquals('foo', $errors[0]->getKey());
+        self::assertEquals('expected length to be in range (5, 10), but got 3', $errors[0]->getDetails());
+    }
+
+    public function testWordCount()
+    {
+        $object = [
+            'foo' => 'bar baz qux'
+        ];
+        $errors = $this->req->validate($object, [
+            'foo' => $this->req->wordCount(3)
+        ]);
+        self::assertEmpty($errors);
+
+        $errors = $this->req->validate($object, [
+            'foo' => $this->req->wordCount(2)
+        ]);
+        self::assertNotEmpty($errors);
+        self::assertEquals('foo', $errors[0]->getKey());
+        self::assertEquals('expected word count to be 2, but got 3', $errors[0]->getDetails());
+    }
+
+    public function testWordCountRange()
+    {
+        $object = [
+            'foo' => 'bar baz qux'
+        ];
+
+        $errors = $this->req->validate($object, [
+            'foo' => $this->req->wordCountRange(1, 4)
+        ]);
+        self::assertEmpty($errors);
+
+        $errors = $this->req->validate($object, [
+            'foo' => $this->req->wordCountRange(5, 10)
+        ]);
+        self::assertNotEmpty($errors);
+        self::assertEquals('foo', $errors[0]->getKey());
+        self::assertEquals('expected word count to be in range (5, 10), but got 3', $errors[0]->getDetails());
+    }
+
+    public function testEvery()
+    {
+        $errors = $this->req->validate(['numbers' => [1, 5, 11]], [
+            'numbers' => $this->req->every($this->req->odd())
+        ]);
+        self::assertEmpty($errors);
+
+        $errors = $this->req->validate(['numbers' => [1, 50, 11]], [
+            'numbers' => $this->req->every($this->req->odd())
+        ]);
+        self::assertNotEmpty($errors);
+        $expected = "error at index 1, expected 50 to be odd";
+        self::assertEquals($expected, $errors[0]->getDetails());
+
+        $errors = $this->req->validate(['numbers' => [1, 50, 100]], [
+            'numbers' => $this->req->every($this->req->odd())
+        ]);
+        self::assertNotEmpty($errors);
+        self::assertEquals('numbers', $errors[0]->getKey());
+        $expected = "errors at indices 1, 2:\n[1] expected 50 to be odd\n[2] expected 100 to be odd";
+        self::assertEquals($expected, $errors[0]->getDetails());
+    }
+
+    public function testReqsOnSubObject()
+    {
         $object = [
             'name' => 'bob',
             'job' => [
@@ -217,5 +402,28 @@ class ReqyTest extends TestCase
             }
         ]);
         self::assertNotEmpty($errors);
+    }
+
+    public function testLengthWithPreprocessor()
+    {
+        $object = [
+            'foo' => 'bar baz '
+        ];
+
+        $errors = $this->req->validate($object, [
+            'foo' => $this->req->length(6)->setPreprocess(function ($string) {
+                return str_replace(' ', '', $string);
+            }),
+        ]);
+        self::assertEmpty($errors);
+
+        $errors = $this->req->validate($object, [
+            'foo' => $this->req->length(8)->setPreprocess(function ($string) {
+                return str_replace(' ', '', $string);
+            }),
+        ]);
+        self::assertNotEmpty($errors);
+        self::assertEquals('foo', $errors[0]->getKey());
+        self::assertEquals('expected length to be 8, but got 6', $errors[0]->getDetails());
     }
 }

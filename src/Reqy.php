@@ -17,52 +17,127 @@ class Reqy
     }
 
     /**
-     * @param array $args
-     * @param array $types
-     */
-    protected function typeCheck(array $args, array $types)
-    {
-        for ($i = 0; $i < count($args); $i++) {
-            $arg = $args[$i];
-            $type = $types[$i];
-            $actualType = gettype($arg);
-
-            if ($type != '*' && $actualType !== $type) {
-                throw new \InvalidArgumentException("expected arg #$i to be of type $type, but got $actualType");
-            }
-        }
-    }
-
-    /**
-     * @param ReqyErrorLevel|null $level
      * @return Validator
      */
-    public function exists(ReqyErrorLevel $level = null)
+    public function exists(): Validator
     {
-        $level = $level ?? $this->defaultErrorLevel;
-        return new Validator('exists', $level, function ($value) {
+        return new Validator('exists', $this->defaultErrorLevel, function ($value) {
             return $value !== null ?: "expected field to exist";
         });
     }
 
+    public function notEmpty(): Validator
+    {
+        return new Validator('not empty', $this->defaultErrorLevel, function ($value) {
+            return $value !== null && $this->getLength($value) > 0 ?: "expected field to be non-empty";
+        });
+    }
+
     /**
-     * @params ReqyErrorLevel $level = ReqyErrorLevel::$ERROR, $expected
+     * @params $expected
      * @return Validator
      */
-    public function equals()
+    public function equals($expected): Validator
     {
-        if (func_num_args() === 1) {
-            list($expected) = func_get_args();
-            $level = $this->defaultErrorLevel;
-        } elseif (func_num_args() === 2) {
-            $this->typeCheck(func_get_args(), [ReqyErrorLevel::class, '*']);
-            list($level, $expected) = func_get_args();
-        } else {
-            throw new \InvalidArgumentException();
-        }
-
-        return new Validator('equals', $level, function ($value) use ($expected) {
+        return new Validator('equals', $this->defaultErrorLevel, function ($value) use ($expected) {
             return $value === $expected ?: "expected <$expected>, but got <$value>";
+        });
+    }
+
+    /**
+     * @param array $options
+     * @return Validator
+     */
+    public function in(array $options): Validator
+    {
+        return new Validator('in', $this->defaultErrorLevel, function ($value) use ($options) {
+            return in_array($value, $options) ?: "expected <$value> to be in array " . json_encode($options);
+        });
+    }
+
+    /**
+     * @return Validator
+     */
+    public function even(): Validator
+    {
+        return new Validator('even', $this->defaultErrorLevel, function ($value) {
+            return $value % 2 === 0 ?: "expected $value to be even";
+        });
+    }
+
+    /**
+     * @return Validator
+     */
+    public function odd(): Validator
+    {
+        return new Validator('odd', $this->defaultErrorLevel, function ($value) {
+            return $value % 2 === 1 ?: "expected $value to be odd";
+        });
+    }
+
+    /**
+     * @param int $min
+     * @param int $max = null
+     * @return Validator
+     */
+    public function range(int $min, int $max = null): Validator
+    {
+        return new Validator('range', $this->defaultErrorLevel, function ($value) use ($min, $max) {
+            return $this->validateRange('value', $value, $min, $max);
+        });
+    }
+
+    /**
+     * @param int $expected
+     * @return Validator
+     */
+    public function length(int $expected): Validator
+    {
+        return new Validator('length', $this->defaultErrorLevel, function ($value) use ($expected) {
+            $len = $this->getLength($value);
+
+            return $len === $expected ?: "expected length to be $expected, but got $len";
+        });
+    }
+
+    /**
+     * @param int $min
+     * @param int|null $max
+     * @return Validator
+     */
+    public function lengthRange(int $min, int $max = null): Validator
+    {
+        return new Validator('length range', $this->defaultErrorLevel, function ($value) use ($min, $max) {
+            $len = $this->getLength($value);
+
+            return $this->validateRange('length', $len, $min, $max);
+        });
+    }
+
+    /**
+     * @param int $expected
+     * @return Validator
+     */
+    public function wordCount(int $expected): Validator
+    {
+        return new Validator('word count', $this->defaultErrorLevel, function ($value) use ($expected) {
+            $wc = str_word_count($value);
+
+            return $wc === $expected ?: "expected word count to be $expected, but got $wc";
+        });
+    }
+
+    /**
+     * @param int $min
+     * @param int|null $max
+     * @return Validator
+     */
+    public function wordCountRange(int $min, int $max = null): Validator
+    {
+        return new Validator('word count range', $this->defaultErrorLevel, function ($value) use ($min, $max) {
+            $wc = str_word_count($value);
+
+            return $this->validateRange('word count', $wc, $min, $max);
         });
     }
 
@@ -70,7 +145,7 @@ class Reqy
      * @param Validator $validator
      * @return Validator
      */
-    public function every(Validator $validator)
+    public function every(Validator $validator): Validator
     {
         $name = "every <{$validator->getName()}>";
         return new Validator($name, $validator->getLevel(), function ($values) use ($validator) {
@@ -102,53 +177,6 @@ class Reqy
     }
 
     /**
-     * @param ReqyErrorLevel|null $level
-     * @return Validator
-     */
-    public function odd(ReqyErrorLevel $level = null)
-    {
-        $level = $level ?? $this->defaultErrorLevel;
-        return new Validator('odd', $level, function ($value) {
-            return $value % 2 === 1 ?: "expected <$value> to be odd";
-        });
-    }
-
-    /**
-     * @param ReqyErrorLevel|null $level
-     * @return Validator
-     */
-    public function even(ReqyErrorLevel $level = null)
-    {
-        $level = $level ?? $this->defaultErrorLevel;
-        return new Validator('even', $level, function ($value) {
-            return $value % 2 === 0 ?: "expected <$value> to be even";
-        });
-    }
-
-    /**
-     * @params ReqyErrorLevel $level = ReqyErrorLevel::$ERROR, int $min, int $max = null
-     * @return Validator
-     */
-    public function range()
-    {
-        if (func_num_args() === 2) {
-            $this->typeCheck(func_get_args(), ['integer', 'integer']);
-            list($min, $max) = func_get_args();
-            $level = $this->defaultErrorLevel;
-        } elseif (func_num_args() === 3) {
-            $this->typeCheck(func_get_args(), [ReqyErrorLevel::class, 'int', 'int']);
-            list($level, $min, $max) = func_get_args();
-        } else {
-            throw new \InvalidArgumentException();
-        }
-
-        return new Validator('range', $level, function ($value) use ($min, $max) {
-            return $value >= $min && ($max === null || $value <= $max)
-                ?: "expected <$value> to be in range ($min, $max)";
-        });
-    }
-
-    /**
      * @param array $reqs [string => Validator|array|*|null]
      */
     public function preprocess(array& $reqs): void
@@ -168,6 +196,30 @@ class Reqy
         }
     }
 
+    protected function validateRange(string $validator, int $value, int $min, int $max = null)
+    {
+        if ($max === null) {
+            return $value >=  $min ?: "expected $validator to be at least $min, but got $value";
+        }
+
+        return $value >= $min && $value <= $max ?: "expected $validator to be in range ($min, $max), but got $value";
+    }
+
+    /**
+     * @param $value
+     * @return int
+     */
+    protected function getLength($value): int
+    {
+        if (is_string($value)) {
+            return strlen($value);
+        } elseif (is_array($value)) {
+            return count($value);
+        }
+
+        throw new \InvalidArgumentException('Cannot determine length of ' . get_class($value));
+    }
+
     /**
      * @param $object
      * @param array $reqs [string => Validator|array]
@@ -185,6 +237,11 @@ class Reqy
             } else {
                 /** @var Validator $validator */
                 $validator = $req;
+
+                $preprocess = $validator->getPreprocess();
+                if ($preprocess) {
+                    $value = $preprocess($value);
+                }
 
                 $predicate = $validator->getPredicate();
                 $result = $predicate($value);
