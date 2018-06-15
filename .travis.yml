@@ -2,6 +2,9 @@ language: php
 # cache: yarn
 php:
   - 7.1
+directories:
+  # cache composer
+  - $HOME/.composer/cache/files
 install:
   - travis_retry composer install
 script:
