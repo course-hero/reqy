@@ -1,13 +1,13 @@
 <?php
 
-namespace Reqy;
+namespace CourseHero\Reqy;
 
 class Validator
 {
     /** @var string */
     protected $name;
 
-    /** @var ReqyErrorLevel */
+    /** @var ErrorLevel */
     protected $level;
 
     /** @var \Closure */
@@ -19,11 +19,11 @@ class Validator
     /**
      * Validator constructor.
      * @param string $name
-     * @param ReqyErrorLevel $level
+     * @param ErrorLevel $level
      * @param \Closure $predicate
      * @param \Closure $preprocess
      */
-    public function __construct($name, ReqyErrorLevel $level, \Closure $predicate, \Closure $preprocess = null)
+    public function __construct($name, ErrorLevel $level, \Closure $predicate, \Closure $preprocess = null)
     {
         $this->name = $name;
         $this->level = $level;
@@ -51,18 +51,18 @@ class Validator
     }
 
     /**
-     * @return ReqyErrorLevel
+     * @return ErrorLevel
      */
-    public function getLevel(): ReqyErrorLevel
+    public function getLevel(): ErrorLevel
     {
         return $this->level;
     }
 
     /**
-     * @param ReqyErrorLevel $level
+     * @param ErrorLevel $level
      * @return Validator
      */
-    public function setLevel(ReqyErrorLevel $level): Validator
+    public function setLevel(ErrorLevel $level): Validator
     {
         $this->level = $level;
 

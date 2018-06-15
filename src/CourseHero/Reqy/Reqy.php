@@ -1,19 +1,19 @@
 <?php
 
-namespace Reqy;
+namespace CourseHero\Reqy;
 
 class Reqy
 {
-    /** @var ReqyErrorLevel */
+    /** @var ErrorLevel */
     protected $defaultErrorLevel;
 
     /**
      * Reqy constructor.
-     * @param ReqyErrorLevel $defaultErrorLevel
+     * @param ErrorLevel $defaultErrorLevel
      */
-    public function __construct(ReqyErrorLevel $defaultErrorLevel = null)
+    public function __construct(ErrorLevel $defaultErrorLevel = null)
     {
-        $this->defaultErrorLevel = $defaultErrorLevel ?? ReqyErrorLevel::$ERROR;
+        $this->defaultErrorLevel = $defaultErrorLevel ?? ErrorLevel::$ERROR;
     }
 
     /**
@@ -189,7 +189,7 @@ class Reqy
             } elseif (is_array($value)) {
                 $this->preprocess($value);
             } elseif ($value instanceof \Closure) {
-                $reqs[$key] = new Validator('custom validator', ReqyErrorLevel::$ERROR, $value);
+                $reqs[$key] = new Validator('custom validator', ErrorLevel::$ERROR, $value);
             } elseif (!($value instanceof Validator)) {
                 $reqs[$key] = $this->equals($value);
             }
@@ -223,7 +223,7 @@ class Reqy
     /**
      * @param $object
      * @param array $reqs [string => Validator|array]
-     * @param ReqyError[] $errors
+     * @param Error[] $errors
      * @param string $baseKey
      */
     protected function validateImpl($object, array $reqs, array& $errors, string $baseKey = '')
@@ -246,7 +246,7 @@ class Reqy
                 $predicate = $validator->getPredicate();
                 $result = $predicate($value);
                 if ($result !== true) {
-                    $errors[] = new ReqyError($validator->getLevel(), $keyConcat, $validator->getName(), $result);
+                    $errors[] = new Error($validator->getLevel(), $keyConcat, $validator->getName(), $result);
                 }
             }
         }
@@ -256,11 +256,11 @@ class Reqy
      * @param $object
      * @param array $reqs
      * @param bool $preprocess
-     * @return ReqyError[]
+     * @return Error[]
      */
     public function validate($object, array $reqs, bool $preprocess = true): array
     {
-        /** @var ReqyError[] $errors */
+        /** @var Error[] $errors */
         $errors = [];
 
         if ($preprocess) {
@@ -286,17 +286,17 @@ class Reqy
     }
 
     /**
-     * @return ReqyErrorLevel
+     * @return ErrorLevel
      */
-    public function getDefaultErrorLevel(): ReqyErrorLevel
+    public function getDefaultErrorLevel(): ErrorLevel
     {
         return $this->defaultErrorLevel;
     }
 
     /**
-     * @param ReqyErrorLevel $defaultErrorLevel
+     * @param ErrorLevel $defaultErrorLevel
      */
-    public function setDefaultErrorLevel(ReqyErrorLevel $defaultErrorLevel)
+    public function setDefaultErrorLevel(ErrorLevel $defaultErrorLevel)
     {
         $this->defaultErrorLevel = $defaultErrorLevel;
     }

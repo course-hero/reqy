@@ -1,10 +1,10 @@
 <?php
 
-namespace Reqy;
+namespace CourseHero\Reqy;
 
-class ReqyError implements \JsonSerializable
+class Error implements \JsonSerializable
 {
-    /** @var ReqyErrorLevel */
+    /** @var ErrorLevel */
     protected $level;
 
     /** @var string */
@@ -17,13 +17,13 @@ class ReqyError implements \JsonSerializable
     protected $details;
 
     /**
-     * ReqyError constructor.
-     * @param ReqyErrorLevel $level
+     * Error constructor.
+     * @param ErrorLevel $level
      * @param string $key
      * @param string $validationName
      * @param string $details
      */
-    public function __construct(ReqyErrorLevel $level, string $key, string $validationName, string $details)
+    public function __construct(ErrorLevel $level, string $key, string $validationName, string $details)
     {
         $this->level = $level;
         $this->key = $key;
@@ -32,17 +32,17 @@ class ReqyError implements \JsonSerializable
     }
 
     /**
-     * @return ReqyErrorLevel
+     * @return ErrorLevel
      */
-    public function getLevel(): ReqyErrorLevel
+    public function getLevel(): ErrorLevel
     {
         return $this->level;
     }
 
     /**
-     * @param ReqyErrorLevel $level
+     * @param ErrorLevel $level
      */
-    public function setLevel(ReqyErrorLevel $level)
+    public function setLevel(ErrorLevel $level)
     {
         $this->level = $level;
     }

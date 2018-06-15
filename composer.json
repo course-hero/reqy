@@ -1,18 +1,18 @@
 {
-  "name": "hoten/reqy",
-  "description": "Easily validate data schemas",
+  "name": "coursehero/reqy",
+  "description": "Easily validate data",
   "type": "library",
-  "keywords": ["validate","schema"],
+  "keywords": ["validate","data"],
   "homepage": "https://github.com/hoten/reqy",
   "license": "MIT",
   "autoload": {
     "psr-4": {
-      "Reqy\\": "src/"
+      "": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Reqy\\Tests\\": "tests/"
+      "Tests\\": "tests/"
     }
   },
   "require-dev": {

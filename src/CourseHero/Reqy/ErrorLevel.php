@@ -1,30 +1,30 @@
 <?php
 
-namespace Reqy;
+namespace CourseHero\Reqy;
 
 /**
- * Class ReqyErrorLevel
+ * Class ErrorLevel
  * @package Reqy
  */
-class ReqyErrorLevel
+class ErrorLevel
 {
-    /** @var ReqyErrorLevel */
+    /** @var ErrorLevel */
     public static $ERROR;
 
-    /** @var ReqyErrorLevel */
+    /** @var ErrorLevel */
     public static $WARNING;
 
     public static function initClass()
     {
-        self::$ERROR = new ReqyErrorLevel('ERROR');
-        self::$WARNING = new ReqyErrorLevel('WARNING');
+        self::$ERROR = new ErrorLevel('ERROR');
+        self::$WARNING = new ErrorLevel('WARNING');
     }
 
     /** @var string */
     protected $level;
 
     /**
-     * ReqyErrorLevel constructor.
+     * ErrorLevel constructor.
      * @param string $level
      */
     public function __construct($level)
@@ -42,4 +42,4 @@ class ReqyErrorLevel
 }
 
 // @codingStandardsIgnoreLine
-ReqyErrorLevel::initClass();
+ErrorLevel::initClass();
