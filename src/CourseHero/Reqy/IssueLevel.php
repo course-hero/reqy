@@ -3,28 +3,28 @@
 namespace CourseHero\Reqy;
 
 /**
- * Class ErrorLevel
+ * Class IssueLevel
  * @package Reqy
  */
-class ErrorLevel
+class IssueLevel
 {
-    /** @var ErrorLevel */
+    /** @var IssueLevel */
     public static $ERROR;
 
-    /** @var ErrorLevel */
+    /** @var IssueLevel */
     public static $WARNING;
 
     public static function initClass()
     {
-        self::$ERROR = new ErrorLevel('ERROR');
-        self::$WARNING = new ErrorLevel('WARNING');
+        self::$ERROR = new IssueLevel('ERROR');
+        self::$WARNING = new IssueLevel('WARNING');
     }
 
     /** @var string */
     protected $level;
 
     /**
-     * ErrorLevel constructor.
+     * IssueLevel constructor.
      * @param string $level
      */
     public function __construct($level)
@@ -42,4 +42,4 @@ class ErrorLevel
 }
 
 // @codingStandardsIgnoreLine
-ErrorLevel::initClass();
+IssueLevel::initClass();

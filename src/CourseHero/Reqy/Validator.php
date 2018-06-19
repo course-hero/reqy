@@ -7,7 +7,7 @@ class Validator
     /** @var string */
     protected $name;
 
-    /** @var ErrorLevel */
+    /** @var IssueLevel */
     protected $level;
 
     /** @var \Closure */
@@ -19,11 +19,11 @@ class Validator
     /**
      * Validator constructor.
      * @param string $name
-     * @param ErrorLevel $level
+     * @param IssueLevel $level
      * @param \Closure $predicate
      * @param \Closure $preprocess
      */
-    public function __construct($name, ErrorLevel $level, \Closure $predicate, \Closure $preprocess = null)
+    public function __construct($name, IssueLevel $level, \Closure $predicate, \Closure $preprocess = null)
     {
         $this->name = $name;
         $this->level = $level;
@@ -51,18 +51,18 @@ class Validator
     }
 
     /**
-     * @return ErrorLevel
+     * @return IssueLevel
      */
-    public function getLevel(): ErrorLevel
+    public function getLevel(): IssueLevel
     {
         return $this->level;
     }
 
     /**
-     * @param ErrorLevel $level
+     * @param IssueLevel $level
      * @return Validator
      */
-    public function setLevel(ErrorLevel $level): Validator
+    public function setLevel(IssueLevel $level): Validator
     {
         $this->level = $level;
 

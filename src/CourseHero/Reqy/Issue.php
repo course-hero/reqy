@@ -2,9 +2,9 @@
 
 namespace CourseHero\Reqy;
 
-class Error implements \JsonSerializable
+class Issue implements \JsonSerializable
 {
-    /** @var ErrorLevel */
+    /** @var IssueLevel */
     protected $level;
 
     /** @var string */
@@ -17,13 +17,13 @@ class Error implements \JsonSerializable
     protected $details;
 
     /**
-     * Error constructor.
-     * @param ErrorLevel $level
+     * Issue constructor.
+     * @param IssueLevel $level
      * @param string $key
      * @param string $validationName
      * @param string $details
      */
-    public function __construct(ErrorLevel $level, string $key, string $validationName, string $details)
+    public function __construct(IssueLevel $level, string $key, string $validationName, string $details)
     {
         $this->level = $level;
         $this->key = $key;
@@ -32,17 +32,17 @@ class Error implements \JsonSerializable
     }
 
     /**
-     * @return ErrorLevel
+     * @return IssueLevel
      */
-    public function getLevel(): ErrorLevel
+    public function getLevel(): IssueLevel
     {
         return $this->level;
     }
 
     /**
-     * @param ErrorLevel $level
+     * @param IssueLevel $level
      */
-    public function setLevel(ErrorLevel $level)
+    public function setLevel(IssueLevel $level)
     {
         $this->level = $level;
     }

@@ -4,16 +4,16 @@ namespace CourseHero\Reqy;
 
 class Reqy
 {
-    /** @var ErrorLevel */
-    protected $defaultErrorLevel;
+    /** @var IssueLevel */
+    protected $defaultIssueLevel;
 
     /**
      * Reqy constructor.
-     * @param ErrorLevel $defaultErrorLevel
+     * @param IssueLevel $defaultIssueLevel
      */
-    public function __construct(ErrorLevel $defaultErrorLevel = null)
+    public function __construct(IssueLevel $defaultIssueLevel = null)
     {
-        $this->defaultErrorLevel = $defaultErrorLevel ?? ErrorLevel::$ERROR;
+        $this->defaultIssueLevel = $defaultIssueLevel ?? IssueLevel::$ERROR;
     }
 
     /**
@@ -21,14 +21,14 @@ class Reqy
      */
     public function exists(): Validator
     {
-        return new Validator('exists', $this->defaultErrorLevel, function ($value) {
+        return new Validator('exists', $this->defaultIssueLevel, function ($value) {
             return $value !== null ?: "expected field to exist";
         });
     }
 
     public function notEmpty(): Validator
     {
-        return new Validator('not empty', $this->defaultErrorLevel, function ($value) {
+        return new Validator('not empty', $this->defaultIssueLevel, function ($value) {
             return $value !== null && $this->getLength($value) > 0 ?: "expected field to be non-empty";
         });
     }
@@ -39,7 +39,7 @@ class Reqy
      */
     public function equals($expected): Validator
     {
-        return new Validator('equals', $this->defaultErrorLevel, function ($value) use ($expected) {
+        return new Validator('equals', $this->defaultIssueLevel, function ($value) use ($expected) {
             return $value === $expected ?: "expected <$expected>, but got <$value>";
         });
     }
@@ -50,7 +50,7 @@ class Reqy
      */
     public function in(array $options): Validator
     {
-        return new Validator('in', $this->defaultErrorLevel, function ($value) use ($options) {
+        return new Validator('in', $this->defaultIssueLevel, function ($value) use ($options) {
             return in_array($value, $options) ?: "expected <$value> to be in array " . json_encode($options);
         });
     }
@@ -60,7 +60,7 @@ class Reqy
      */
     public function even(): Validator
     {
-        return new Validator('even', $this->defaultErrorLevel, function ($value) {
+        return new Validator('even', $this->defaultIssueLevel, function ($value) {
             return $value % 2 === 0 ?: "expected $value to be even";
         });
     }
@@ -70,7 +70,7 @@ class Reqy
      */
     public function odd(): Validator
     {
-        return new Validator('odd', $this->defaultErrorLevel, function ($value) {
+        return new Validator('odd', $this->defaultIssueLevel, function ($value) {
             return $value % 2 === 1 ?: "expected $value to be odd";
         });
     }
@@ -82,7 +82,7 @@ class Reqy
      */
     public function range(int $min, int $max = null): Validator
     {
-        return new Validator('range', $this->defaultErrorLevel, function ($value) use ($min, $max) {
+        return new Validator('range', $this->defaultIssueLevel, function ($value) use ($min, $max) {
             return $this->validateRange('value', $value, $min, $max);
         });
     }
@@ -93,7 +93,7 @@ class Reqy
      */
     public function length(int $expected): Validator
     {
-        return new Validator('length', $this->defaultErrorLevel, function ($value) use ($expected) {
+        return new Validator('length', $this->defaultIssueLevel, function ($value) use ($expected) {
             if (is_null($value)) {
                 return "expected length to be $expected, but value is missing";
             }
@@ -110,7 +110,7 @@ class Reqy
      */
     public function lengthRange(int $min, int $max = null): Validator
     {
-        return new Validator('length range', $this->defaultErrorLevel, function ($value) use ($min, $max) {
+        return new Validator('length range', $this->defaultIssueLevel, function ($value) use ($min, $max) {
             if (is_null($value)) {
                 return "expected length to be in range ($min, $max), but value is missing";
             }
@@ -126,7 +126,7 @@ class Reqy
      */
     public function wordCount(int $expected): Validator
     {
-        return new Validator('word count', $this->defaultErrorLevel, function ($value) use ($expected) {
+        return new Validator('word count', $this->defaultIssueLevel, function ($value) use ($expected) {
             $wc = str_word_count($value);
 
             return $wc === $expected ?: "expected word count to be $expected, but got $wc";
@@ -140,7 +140,7 @@ class Reqy
      */
     public function wordCountRange(int $min, int $max = null): Validator
     {
-        return new Validator('word count range', $this->defaultErrorLevel, function ($value) use ($min, $max) {
+        return new Validator('word count range', $this->defaultIssueLevel, function ($value) use ($min, $max) {
             $wc = str_word_count($value);
 
             return $this->validateRange('word count', $wc, $min, $max);
@@ -155,30 +155,30 @@ class Reqy
     {
         $name = "every <{$validator->getName()}>";
         return new Validator($name, $validator->getLevel(), function ($values) use ($validator) {
-            $errorLines = [];
+            $issueLines = [];
             foreach ($values as $i => $value) {
                 $result = $validator->getPredicate()($value);
                 if ($result !== true) {
-                    $errorLines[$i] = $result;
+                    $issueLines[$i] = $result;
                 }
             }
 
-            if (empty($errorLines)) {
+            if (empty($issueLines)) {
                 return true;
             }
 
-            if (count($errorLines) === 1) {
-                $index = array_keys($errorLines)[0];
-                $error = $errorLines[$index];
-                return "error at index {$index}, {$error}";
+            if (count($issueLines) === 1) {
+                $index = array_keys($issueLines)[0];
+                $issue = $issueLines[$index];
+                return "issue at index {$index}, {$issue}";
             }
 
-            $indicesListed = join(', ', array_keys($errorLines));
-            $errorsListed = array_map(function ($i, $value) {
+            $indicesListed = join(', ', array_keys($issueLines));
+            $issuesListed = array_map(function ($i, $value) {
                 return "[$i] $value";
-            }, array_keys($errorLines), $errorLines);
+            }, array_keys($issueLines), $issueLines);
 
-            return "errors at indices $indicesListed:\n" . join("\n", $errorsListed);
+            return "issues at indices $indicesListed:\n" . join("\n", $issuesListed);
         });
     }
 
@@ -195,7 +195,7 @@ class Reqy
             } elseif (is_array($value)) {
                 $this->preprocess($value);
             } elseif ($value instanceof \Closure) {
-                $reqs[$key] = new Validator('custom validator', ErrorLevel::$ERROR, $value);
+                $reqs[$key] = new Validator('custom validator', IssueLevel::$ERROR, $value);
             } elseif (!($value instanceof Validator)) {
                 $reqs[$key] = $this->equals($value);
             }
@@ -229,17 +229,17 @@ class Reqy
     /**
      * @param $object
      * @param array $reqs [string => Validator|array]
-     * @param Error[] $errors
+     * @param Issue[] $issues
      * @param string $baseKey
      */
-    protected function validateImpl($object, array $reqs, array& $errors, string $baseKey = '')
+    protected function validateImpl($object, array $reqs, array& $issues, string $baseKey = '')
     {
         foreach ($reqs as $key => $req) {
             $keyConcat = $baseKey ? "$baseKey.$key" : $key;
             $value = $this->resolve($object, $key);
 
             if (is_array($req)) {
-                $this->validateImpl($value, $req, $errors, $keyConcat);
+                $this->validateImpl($value, $req, $issues, $keyConcat);
             } else {
                 /** @var Validator $validator */
                 $validator = $req;
@@ -252,7 +252,7 @@ class Reqy
                 $predicate = $validator->getPredicate();
                 $result = $predicate($value);
                 if ($result !== true) {
-                    $errors[] = new Error($validator->getLevel(), $keyConcat, $validator->getName(), $result);
+                    $issues[] = new Issue($validator->getLevel(), $keyConcat, $validator->getName(), $result);
                 }
             }
         }
@@ -262,19 +262,19 @@ class Reqy
      * @param $object
      * @param array $reqs
      * @param bool $preprocess
-     * @return Error[]
+     * @return Issue[]
      */
     public function validate($object, array $reqs, bool $preprocess = true): array
     {
-        /** @var Error[] $errors */
-        $errors = [];
+        /** @var Issue[] $issues */
+        $issues = [];
 
         if ($preprocess) {
             $this->preprocess($reqs);
         }
 
-        $this->validateImpl($object, $reqs, $errors);
-        return $errors;
+        $this->validateImpl($object, $reqs, $issues);
+        return $issues;
     }
 
     /**
@@ -292,18 +292,18 @@ class Reqy
     }
 
     /**
-     * @return ErrorLevel
+     * @return IssueLevel
      */
-    public function getDefaultErrorLevel(): ErrorLevel
+    public function getDefaultIssueLevel(): IssueLevel
     {
-        return $this->defaultErrorLevel;
+        return $this->defaultIssueLevel;
     }
 
     /**
-     * @param ErrorLevel $defaultErrorLevel
+     * @param IssueLevel $defaultIssueLevel
      */
-    public function setDefaultErrorLevel(ErrorLevel $defaultErrorLevel)
+    public function setDefaultIssueLevel(IssueLevel $defaultIssueLevel)
     {
-        $this->defaultErrorLevel = $defaultErrorLevel;
+        $this->defaultIssueLevel = $defaultIssueLevel;
     }
 }
