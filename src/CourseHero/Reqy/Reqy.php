@@ -13,7 +13,7 @@ class Reqy
      */
     public function __construct(IssueLevel $defaultIssueLevel = null)
     {
-        $this->defaultIssueLevel = $defaultIssueLevel ?? IssueLevel::$ERROR;
+        $this->setDefaultIssueLevel($defaultIssueLevel ?? IssueLevel::$ERROR);
     }
 
     /**
@@ -21,14 +21,14 @@ class Reqy
      */
     public function exists(): Validator
     {
-        return new Validator('exists', $this->defaultIssueLevel, function ($value) {
+        return new Validator('exists', $this->getDefaultIssueLevel(), function ($value) {
             return $value !== null ?: "expected field to exist";
         });
     }
 
     public function notEmpty(): Validator
     {
-        return new Validator('not empty', $this->defaultIssueLevel, function ($value) {
+        return new Validator('not empty', $this->getDefaultIssueLevel(), function ($value) {
             return $value !== null && $this->getLength($value) > 0 ?: "expected field to be non-empty";
         });
     }
@@ -39,7 +39,7 @@ class Reqy
      */
     public function equals($expected): Validator
     {
-        return new Validator('equals', $this->defaultIssueLevel, function ($value) use ($expected) {
+        return new Validator('equals', $this->getDefaultIssueLevel(), function ($value) use ($expected) {
             return $value === $expected ?: "expected <$expected>, but got <$value>";
         });
     }
@@ -50,7 +50,7 @@ class Reqy
      */
     public function in(array $options): Validator
     {
-        return new Validator('in', $this->defaultIssueLevel, function ($value) use ($options) {
+        return new Validator('in', $this->getDefaultIssueLevel(), function ($value) use ($options) {
             return in_array($value, $options) ?: "expected <$value> to be in array " . json_encode($options);
         });
     }
@@ -60,7 +60,7 @@ class Reqy
      */
     public function even(): Validator
     {
-        return new Validator('even', $this->defaultIssueLevel, function ($value) {
+        return new Validator('even', $this->getDefaultIssueLevel(), function ($value) {
             return $value % 2 === 0 ?: "expected $value to be even";
         });
     }
@@ -70,7 +70,7 @@ class Reqy
      */
     public function odd(): Validator
     {
-        return new Validator('odd', $this->defaultIssueLevel, function ($value) {
+        return new Validator('odd', $this->getDefaultIssueLevel(), function ($value) {
             return $value % 2 === 1 ?: "expected $value to be odd";
         });
     }
@@ -82,7 +82,7 @@ class Reqy
      */
     public function range(int $min, int $max = null): Validator
     {
-        return new Validator('range', $this->defaultIssueLevel, function ($value) use ($min, $max) {
+        return new Validator('range', $this->getDefaultIssueLevel(), function ($value) use ($min, $max) {
             return $this->validateRange('value', $value, $min, $max);
         });
     }
@@ -93,7 +93,7 @@ class Reqy
      */
     public function length(int $expected): Validator
     {
-        return new Validator('length', $this->defaultIssueLevel, function ($value) use ($expected) {
+        return new Validator('length', $this->getDefaultIssueLevel(), function ($value) use ($expected) {
             if (is_null($value)) {
                 return "expected length to be $expected, but value is missing";
             }
@@ -110,7 +110,7 @@ class Reqy
      */
     public function lengthRange(int $min, int $max = null): Validator
     {
-        return new Validator('length range', $this->defaultIssueLevel, function ($value) use ($min, $max) {
+        return new Validator('length range', $this->getDefaultIssueLevel(), function ($value) use ($min, $max) {
             if (is_null($value)) {
                 return "expected length to be in range ($min, $max), but value is missing";
             }
@@ -126,7 +126,7 @@ class Reqy
      */
     public function wordCount(int $expected): Validator
     {
-        return new Validator('word count', $this->defaultIssueLevel, function ($value) use ($expected) {
+        return new Validator('word count', $this->getDefaultIssueLevel(), function ($value) use ($expected) {
             $wc = str_word_count($value);
 
             return $wc === $expected ?: "expected word count to be $expected, but got $wc";
@@ -140,7 +140,7 @@ class Reqy
      */
     public function wordCountRange(int $min, int $max = null): Validator
     {
-        return new Validator('word count range', $this->defaultIssueLevel, function ($value) use ($min, $max) {
+        return new Validator('word count range', $this->getDefaultIssueLevel(), function ($value) use ($min, $max) {
             $wc = str_word_count($value);
 
             return $this->validateRange('word count', $wc, $min, $max);
@@ -223,7 +223,7 @@ class Reqy
             return count($value);
         }
 
-        throw new \InvalidArgumentException('Cannot determine length of ' . get_class($value));
+        throw new \InvalidArgumentException('Cannot determine length of ' . $this->getVarType($value));
     }
 
     /**
@@ -278,6 +278,22 @@ class Reqy
     }
 
     /**
+     * @return IssueLevel
+     */
+    public function getDefaultIssueLevel(): IssueLevel
+    {
+        return $this->defaultIssueLevel;
+    }
+
+    /**
+     * @param IssueLevel $defaultIssueLevel
+     */
+    public function setDefaultIssueLevel(IssueLevel $defaultIssueLevel)
+    {
+        $this->defaultIssueLevel = $defaultIssueLevel;
+    }
+
+    /**
      * @param $object
      * @param $key
      * @return *
@@ -295,19 +311,16 @@ class Reqy
         }
     }
 
-    /**
-     * @return IssueLevel
-     */
-    public function getDefaultIssueLevel(): IssueLevel
+    protected function getVarType($var)
     {
-        return $this->defaultIssueLevel;
-    }
+        if (is_object($var)) {
+            return get_class($var);
+        }
 
-    /**
-     * @param IssueLevel $defaultIssueLevel
-     */
-    public function setDefaultIssueLevel(IssueLevel $defaultIssueLevel)
-    {
-        $this->defaultIssueLevel = $defaultIssueLevel;
+        if (is_resource($var)) {
+            return get_resource_type($var);
+        }
+
+        return gettype($var);
     }
 }

@@ -25,10 +25,10 @@ class Validator
      */
     public function __construct($name, IssueLevel $level, \Closure $predicate, \Closure $preprocess = null)
     {
-        $this->name = $name;
-        $this->level = $level;
-        $this->predicate = $predicate;
-        $this->preprocess = $preprocess;
+        $this->setName($name);
+        $this->setLevel($level);
+        $this->setPredicate($predicate);
+        $this->setPreprocess($preprocess);
     }
 
     /**
@@ -100,7 +100,7 @@ class Validator
      * @param \Closure $preprocess
      * @return Validator
      */
-    public function setPreprocess(\Closure $preprocess): Validator
+    public function setPreprocess(\Closure $preprocess = null): Validator
     {
         $this->preprocess = $preprocess;
 

@@ -25,10 +25,10 @@ class Issue implements \JsonSerializable
      */
     public function __construct(IssueLevel $level, string $key, string $validationName, string $details)
     {
-        $this->level = $level;
-        $this->key = $key;
-        $this->validationName = $validationName;
-        $this->details = $details;
+        $this->setLevel($level);
+        $this->setKey($key);
+        $this->setValidationName($validationName);
+        $this->setDetails($details);
     }
 
     /**
@@ -100,7 +100,7 @@ class Issue implements \JsonSerializable
      */
     public function __toString(): string
     {
-        return "[{$this->level}] <{$this->key}> {$this->validationName}: {$this->details}";
+        return "[{$this->getLevel()}] <{$this->key}> {$this->validationName}: {$this->details}";
     }
 
     /**

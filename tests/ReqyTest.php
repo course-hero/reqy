@@ -182,6 +182,21 @@ class ReqyTest extends TestCase
         self::assertEquals('expected value to be in range (0, 10), but got 100', $issues[0]->getDetails());
     }
 
+    public function testRangeNoMax()
+    {
+        $issues = $this->reqy->validate(['cost' => 100], [
+            'cost' => $this->reqy->range(50)
+        ]);
+        self::assertEmpty($issues);
+
+        $issues = $this->reqy->validate(['cost' => 0], [
+            'cost' => $this->reqy->range(50)
+        ]);
+        self::assertNotEmpty($issues);
+        self::assertEquals('cost', $issues[0]->getKey());
+        self::assertEquals('expected value to be at least 50, but got 0', $issues[0]->getDetails());
+    }
+
     public function testLength()
     {
         $object = [
@@ -439,4 +454,41 @@ class ReqyTest extends TestCase
         ]);
         self::assertEquals('expected length to be in range (1, 3), but value is missing', $issues[0]->getDetails());
     }
+
+    public function testLengthWithBadValueThrowsException()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Cannot determine length of integer');
+        $this->reqy->validate([
+            'age' => 23
+        ], [
+            'age' => $this->reqy->length(2)
+        ]);
+    }
+
+    public function testValidateObjectUsingGetterFns()
+    {
+        $issues = $this->reqy->validate(new Car(), [
+            'name' => 'Lamborghini'
+        ]);
+        self::assertEmpty($issues);
+    }
+}
+
+class Car
+{
+   public function getName()
+   {
+       return 'Lamborghini';
+   }
+ 
+   public function getMileage()
+   {
+       return null;
+   }
+ 
+   public function getDescription()
+   {
+       return 'Cool car';
+   }
 }
