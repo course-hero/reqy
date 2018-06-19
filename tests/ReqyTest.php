@@ -15,11 +15,11 @@ class ReqyTest extends TestCase
     }
 
     /** @var Reqy */
-    protected $req;
+    protected $reqy;
 
     public function setUp()
     {
-        $this->req = new Reqy();
+        $this->reqy = new Reqy();
     }
 
     public function testCanary()
@@ -27,19 +27,19 @@ class ReqyTest extends TestCase
         $object = [
             'foo' => 'bar'
         ];
-        $errors = $this->req->validate($object, []);
+        $errors = $this->reqy->validate($object, []);
         self::assertEmpty($errors);
     }
 
     public function testExists()
     {
-        $errors = $this->req->validate(['foo' => 'bar'], [
-            'foo' => $this->req->exists()
+        $errors = $this->reqy->validate(['foo' => 'bar'], [
+            'foo' => $this->reqy->exists()
         ]);
         self::assertEmpty($errors);
 
-        $errors = $this->req->validate([], [
-            'foo' => $this->req->exists()
+        $errors = $this->reqy->validate([], [
+            'foo' => $this->reqy->exists()
         ]);
         self::assertNotEmpty($errors);
         self::assertEquals('foo', $errors[0]->getKey());
@@ -52,35 +52,35 @@ class ReqyTest extends TestCase
             'foo'
         ];
         $expected = [
-            'foo' => $this->req->exists()
+            'foo' => $this->reqy->exists()
         ];
 
-        $this->req->preprocess($reqs);
+        $this->reqy->preprocess($reqs);
         self::assertEquals($expected, $reqs);
     }
 
     public function testNotEmpty()
     {
-        $errors = $this->req->validate(['foo' => 'bar'], [
-            'foo' => $this->req->notEmpty()
+        $errors = $this->reqy->validate(['foo' => 'bar'], [
+            'foo' => $this->reqy->notEmpty()
         ]);
         self::assertEmpty($errors);
 
-        $errors = $this->req->validate(['foo' => ''], [
-            'foo' => $this->req->notEmpty()
+        $errors = $this->reqy->validate(['foo' => ''], [
+            'foo' => $this->reqy->notEmpty()
         ]);
         self::assertNotEmpty($errors);
         self::assertEquals('foo', $errors[0]->getKey());
         self::assertEquals('expected field to be non-empty', $errors[0]->getDetails());
 
 
-        $errors = $this->req->validate(['foo' => [1]], [
-            'foo' => $this->req->notEmpty()
+        $errors = $this->reqy->validate(['foo' => [1]], [
+            'foo' => $this->reqy->notEmpty()
         ]);
         self::assertEmpty($errors);
 
-        $errors = $this->req->validate(['foo' => []], [
-            'foo' => $this->req->notEmpty()
+        $errors = $this->reqy->validate(['foo' => []], [
+            'foo' => $this->reqy->notEmpty()
         ]);
         self::assertNotEmpty($errors);
         self::assertEquals('foo', $errors[0]->getKey());
@@ -92,13 +92,13 @@ class ReqyTest extends TestCase
         $object = [
             'foo' => 'bar'
         ];
-        $errors = $this->req->validate($object, [
-            'foo' => $this->req->equals('bar')
+        $errors = $this->reqy->validate($object, [
+            'foo' => $this->reqy->equals('bar')
         ]);
         self::assertEmpty($errors);
 
-        $errors = $this->req->validate($object, [
-            'foo' => $this->req->equals('barz')
+        $errors = $this->reqy->validate($object, [
+            'foo' => $this->reqy->equals('barz')
         ]);
         self::assertNotEmpty($errors);
         self::assertEquals('foo', $errors[0]->getKey());
@@ -111,10 +111,10 @@ class ReqyTest extends TestCase
             'foo' => 'bar'
         ];
         $expected = [
-            'foo' => $this->req->equals('bar')
+            'foo' => $this->reqy->equals('bar')
         ];
 
-        $this->req->preprocess($reqs);
+        $this->reqy->preprocess($reqs);
         self::assertEquals($expected, $reqs);
     }
 
@@ -123,14 +123,14 @@ class ReqyTest extends TestCase
         $object = [
             'foo' => 2
         ];
-        $errors = $this->req->validate($object, [
-            'foo' => $this->req->in([1, 2, 3])
+        $errors = $this->reqy->validate($object, [
+            'foo' => $this->reqy->in([1, 2, 3])
         ]);
         self::assertEmpty($errors);
 
 
-        $errors = $this->req->validate($object, [
-            'foo' => $this->req->in([1, 3, 5])
+        $errors = $this->reqy->validate($object, [
+            'foo' => $this->reqy->in([1, 3, 5])
         ]);
         self::assertNotEmpty($errors);
         self::assertEquals('foo', $errors[0]->getKey());
@@ -139,13 +139,13 @@ class ReqyTest extends TestCase
 
     public function testEven()
     {
-        $errors = $this->req->validate(['foo' => 2], [
-            'foo' => $this->req->even()
+        $errors = $this->reqy->validate(['foo' => 2], [
+            'foo' => $this->reqy->even()
         ]);
         self::assertEmpty($errors);
 
-        $errors = $this->req->validate(['foo' => 3], [
-            'foo' => $this->req->even()
+        $errors = $this->reqy->validate(['foo' => 3], [
+            'foo' => $this->reqy->even()
         ]);
         self::assertNotEmpty($errors);
         self::assertEquals('foo', $errors[0]->getKey());
@@ -154,13 +154,13 @@ class ReqyTest extends TestCase
 
     public function testOdd()
     {
-        $errors = $this->req->validate(['foo' => 3], [
-            'foo' => $this->req->odd()
+        $errors = $this->reqy->validate(['foo' => 3], [
+            'foo' => $this->reqy->odd()
         ]);
         self::assertEmpty($errors);
 
-        $errors = $this->req->validate(['foo' => 2], [
-            'foo' => $this->req->odd()
+        $errors = $this->reqy->validate(['foo' => 2], [
+            'foo' => $this->reqy->odd()
         ]);
         self::assertNotEmpty($errors);
         self::assertEquals('foo', $errors[0]->getKey());
@@ -169,13 +169,13 @@ class ReqyTest extends TestCase
 
     public function testRange()
     {
-        $errors = $this->req->validate(['cost' => 100], [
-            'cost' => $this->req->range(0, 200)
+        $errors = $this->reqy->validate(['cost' => 100], [
+            'cost' => $this->reqy->range(0, 200)
         ]);
         self::assertEmpty($errors);
 
-        $errors = $this->req->validate(['cost' => 100], [
-            'cost' => $this->req->range(0, 10)
+        $errors = $this->reqy->validate(['cost' => 100], [
+            'cost' => $this->reqy->range(0, 10)
         ]);
         self::assertNotEmpty($errors);
         self::assertEquals('cost', $errors[0]->getKey());
@@ -187,13 +187,13 @@ class ReqyTest extends TestCase
         $object = [
             'foo' => 'bar'
         ];
-        $errors = $this->req->validate($object, [
-            'foo' => $this->req->length(3)
+        $errors = $this->reqy->validate($object, [
+            'foo' => $this->reqy->length(3)
         ]);
         self::assertEmpty($errors);
 
-        $errors = $this->req->validate($object, [
-            'foo' => $this->req->length(2)
+        $errors = $this->reqy->validate($object, [
+            'foo' => $this->reqy->length(2)
         ]);
         self::assertNotEmpty($errors);
         self::assertEquals('foo', $errors[0]->getKey());
@@ -202,13 +202,13 @@ class ReqyTest extends TestCase
         $object = [
             'foo' => [1, 2, 3]
         ];
-        $errors = $this->req->validate($object, [
-            'foo' => $this->req->length(3)
+        $errors = $this->reqy->validate($object, [
+            'foo' => $this->reqy->length(3)
         ]);
         self::assertEmpty($errors);
 
-        $errors = $this->req->validate($object, [
-            'foo' => $this->req->length(2)
+        $errors = $this->reqy->validate($object, [
+            'foo' => $this->reqy->length(2)
         ]);
         self::assertNotEmpty($errors);
         self::assertEquals('foo', $errors[0]->getKey());
@@ -221,13 +221,13 @@ class ReqyTest extends TestCase
             'foo' => 'bar'
         ];
 
-        $errors = $this->req->validate($object, [
-            'foo' => $this->req->lengthRange(1, 4)
+        $errors = $this->reqy->validate($object, [
+            'foo' => $this->reqy->lengthRange(1, 4)
         ]);
         self::assertEmpty($errors);
 
-        $errors = $this->req->validate($object, [
-            'foo' => $this->req->lengthRange(5, 10)
+        $errors = $this->reqy->validate($object, [
+            'foo' => $this->reqy->lengthRange(5, 10)
         ]);
         self::assertNotEmpty($errors);
         self::assertEquals('foo', $errors[0]->getKey());
@@ -237,13 +237,13 @@ class ReqyTest extends TestCase
             'foo' => [1, 2, 3]
         ];
 
-        $errors = $this->req->validate($object, [
-            'foo' => $this->req->lengthRange(1, 4)
+        $errors = $this->reqy->validate($object, [
+            'foo' => $this->reqy->lengthRange(1, 4)
         ]);
         self::assertEmpty($errors);
 
-        $errors = $this->req->validate($object, [
-            'foo' => $this->req->lengthRange(5, 10)
+        $errors = $this->reqy->validate($object, [
+            'foo' => $this->reqy->lengthRange(5, 10)
         ]);
         self::assertNotEmpty($errors);
         self::assertEquals('foo', $errors[0]->getKey());
@@ -255,13 +255,13 @@ class ReqyTest extends TestCase
         $object = [
             'foo' => 'bar baz qux'
         ];
-        $errors = $this->req->validate($object, [
-            'foo' => $this->req->wordCount(3)
+        $errors = $this->reqy->validate($object, [
+            'foo' => $this->reqy->wordCount(3)
         ]);
         self::assertEmpty($errors);
 
-        $errors = $this->req->validate($object, [
-            'foo' => $this->req->wordCount(2)
+        $errors = $this->reqy->validate($object, [
+            'foo' => $this->reqy->wordCount(2)
         ]);
         self::assertNotEmpty($errors);
         self::assertEquals('foo', $errors[0]->getKey());
@@ -274,13 +274,13 @@ class ReqyTest extends TestCase
             'foo' => 'bar baz qux'
         ];
 
-        $errors = $this->req->validate($object, [
-            'foo' => $this->req->wordCountRange(1, 4)
+        $errors = $this->reqy->validate($object, [
+            'foo' => $this->reqy->wordCountRange(1, 4)
         ]);
         self::assertEmpty($errors);
 
-        $errors = $this->req->validate($object, [
-            'foo' => $this->req->wordCountRange(5, 10)
+        $errors = $this->reqy->validate($object, [
+            'foo' => $this->reqy->wordCountRange(5, 10)
         ]);
         self::assertNotEmpty($errors);
         self::assertEquals('foo', $errors[0]->getKey());
@@ -289,20 +289,20 @@ class ReqyTest extends TestCase
 
     public function testEvery()
     {
-        $errors = $this->req->validate(['numbers' => [1, 5, 11]], [
-            'numbers' => $this->req->every($this->req->odd())
+        $errors = $this->reqy->validate(['numbers' => [1, 5, 11]], [
+            'numbers' => $this->reqy->every($this->reqy->odd())
         ]);
         self::assertEmpty($errors);
 
-        $errors = $this->req->validate(['numbers' => [1, 50, 11]], [
-            'numbers' => $this->req->every($this->req->odd())
+        $errors = $this->reqy->validate(['numbers' => [1, 50, 11]], [
+            'numbers' => $this->reqy->every($this->reqy->odd())
         ]);
         self::assertNotEmpty($errors);
         $expected = "error at index 1, expected 50 to be odd";
         self::assertEquals($expected, $errors[0]->getDetails());
 
-        $errors = $this->req->validate(['numbers' => [1, 50, 100]], [
-            'numbers' => $this->req->every($this->req->odd())
+        $errors = $this->reqy->validate(['numbers' => [1, 50, 100]], [
+            'numbers' => $this->reqy->every($this->reqy->odd())
         ]);
         self::assertNotEmpty($errors);
         self::assertEquals('numbers', $errors[0]->getKey());
@@ -321,20 +321,20 @@ class ReqyTest extends TestCase
             ]
         ];
 
-        $errors = $this->req->validate($object, [
+        $errors = $this->reqy->validate($object, [
             'job' => [
-                'title' => $this->req->exists(),
-                'canHeFixIt' => $this->req->equals('yes he can'),
-                'yearBegan' => $this->req->range(1936, 2017)
+                'title' => $this->reqy->exists(),
+                'canHeFixIt' => $this->reqy->equals('yes he can'),
+                'yearBegan' => $this->reqy->range(1936, 2017)
             ]
         ]);
         self::assertEmpty($errors);
 
-        $errors = $this->req->validate($object, [
+        $errors = $this->reqy->validate($object, [
             'job' => [
-                'title' => $this->req->exists(),
-                'canHeFixIt' => $this->req->equals('no he can\'t'),
-                'yearBegan' => $this->req->range(1936, 2017)
+                'title' => $this->reqy->exists(),
+                'canHeFixIt' => $this->reqy->equals('no he can\'t'),
+                'yearBegan' => $this->reqy->range(1936, 2017)
             ]
         ]);
         self::assertNotEmpty($errors);
@@ -354,13 +354,13 @@ class ReqyTest extends TestCase
 
         $expected = [
             'job' => [
-                'title' => $this->req->exists(),
-                'canHeFixIt' => $this->req->equals('yes he can'),
-                'yearBegan' => $this->req->exists()
+                'title' => $this->reqy->exists(),
+                'canHeFixIt' => $this->reqy->equals('yes he can'),
+                'yearBegan' => $this->reqy->exists()
             ]
         ];
 
-        $this->req->preprocess($reqs);
+        $this->reqy->preprocess($reqs);
         self::assertEquals($expected, $reqs);
     }
 
@@ -375,11 +375,11 @@ class ReqyTest extends TestCase
             ]
         ];
 
-        $errors = $this->req->validate($object, [
+        $errors = $this->reqy->validate($object, [
             'job' => [
-                'title' => $this->req->exists(),
-                'canHeFixIt' => $this->req->equals('no he can\'t'),
-                'yearBegan' => $this->req->range(1936, 2017)
+                'title' => $this->reqy->exists(),
+                'canHeFixIt' => $this->reqy->equals('no he can\'t'),
+                'yearBegan' => $this->reqy->range(1936, 2017)
             ]
         ]);
 
@@ -389,14 +389,14 @@ class ReqyTest extends TestCase
 
     public function testClosure()
     {
-        $errors = $this->req->validate(['cost' => 150], [
+        $errors = $this->reqy->validate(['cost' => 150], [
             'cost' => function($value) {
                 return $value % 10 === 0;
             }
         ]);
         self::assertEmpty($errors);
 
-        $errors = $this->req->validate(['cost' => 155], [
+        $errors = $this->reqy->validate(['cost' => 155], [
             'cost' => function($value) {
                 return $value % 10 === 0;
             }
@@ -410,20 +410,28 @@ class ReqyTest extends TestCase
             'foo' => 'bar baz '
         ];
 
-        $errors = $this->req->validate($object, [
-            'foo' => $this->req->length(6)->setPreprocess(function ($string) {
+        $errors = $this->reqy->validate($object, [
+            'foo' => $this->reqy->length(6)->setPreprocess(function ($string) {
                 return str_replace(' ', '', $string);
             }),
         ]);
         self::assertEmpty($errors);
 
-        $errors = $this->req->validate($object, [
-            'foo' => $this->req->length(8)->setPreprocess(function ($string) {
+        $errors = $this->reqy->validate($object, [
+            'foo' => $this->reqy->length(8)->setPreprocess(function ($string) {
                 return str_replace(' ', '', $string);
             }),
         ]);
         self::assertNotEmpty($errors);
         self::assertEquals('foo', $errors[0]->getKey());
         self::assertEquals('expected length to be 8, but got 6', $errors[0]->getDetails());
+    }
+
+    public function testLengthWithMissingValue()
+    {
+        $errors = $this->reqy->validate([], [
+            'cats' => $this->reqy->length(2)
+        ]);
+        self::assertEquals('expected length to be 2, but value is missing', $errors[0]->getDetails());
     }
 }

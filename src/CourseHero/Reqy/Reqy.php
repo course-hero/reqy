@@ -94,8 +94,11 @@ class Reqy
     public function length(int $expected): Validator
     {
         return new Validator('length', $this->defaultErrorLevel, function ($value) use ($expected) {
-            $len = $this->getLength($value);
+            if (is_null($value)) {
+                return "expected length to be $expected, but value is missing";
+            }
 
+            $len = $this->getLength($value);
             return $len === $expected ?: "expected length to be $expected, but got $len";
         });
     }
@@ -108,8 +111,11 @@ class Reqy
     public function lengthRange(int $min, int $max = null): Validator
     {
         return new Validator('length range', $this->defaultErrorLevel, function ($value) use ($min, $max) {
+            if (is_null($value)) {
+                return "expected length to be in range ($min, $max), but value is missing";
+            }
+            
             $len = $this->getLength($value);
-
             return $this->validateRange('length', $len, $min, $max);
         });
     }
