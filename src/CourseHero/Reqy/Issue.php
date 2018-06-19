@@ -10,6 +10,8 @@ class Issue implements \JsonSerializable
     /** @var string */
     protected $key;
 
+    protected $value;
+
     /** @var string */
     protected $validationName;
 
@@ -23,10 +25,9 @@ class Issue implements \JsonSerializable
      * @param string $validationName
      * @param string $details
      */
-    public function __construct(IssueLevel $level, string $key, string $validationName, string $details)
+    public function __construct(IssueLevel $level, string $validationName, string $details)
     {
         $this->setLevel($level);
-        $this->setKey($key);
         $this->setValidationName($validationName);
         $this->setDetails($details);
     }
@@ -47,10 +48,7 @@ class Issue implements \JsonSerializable
         $this->level = $level;
     }
 
-    /**
-     * @return string
-     */
-    public function getKey(): string
+    public function getKey(): ?string
     {
         return $this->key;
     }
@@ -61,6 +59,16 @@ class Issue implements \JsonSerializable
     public function setKey(string $key)
     {
         $this->key = $key;
+    }
+
+    public function getValue()
+    {
+        return $this->value;
+    }
+
+    public function setValue($value)
+    {
+        $this->value = $value;
     }
 
     /**
@@ -100,7 +108,13 @@ class Issue implements \JsonSerializable
      */
     public function __toString(): string
     {
-        return "[{$this->getLevel()}] <{$this->key}> {$this->validationName}: {$this->details}";
+        if (is_string($this->value)) {
+            $valueFormatted = $this->value;
+        } else if (isset($this->value)) {
+            $valueFormatted = json_encode($this->value);
+        }
+        
+        return "[$this->level] " . (isset($this->key) ? "key={$this->key} " : '') . (isset($valueFormatted) ? "value=$valueFormatted " : '') . "{$this->validationName}: {$this->details}";
     }
 
     /**

@@ -3,9 +3,11 @@ declare(strict_types=1);
 
 namespace Reqy\Tests;
 
+use CourseHero\Reqy\Issue;
+use CourseHero\Reqy\IssueLevel;
+use CourseHero\Reqy\Reqy;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
-use CourseHero\Reqy\Reqy;
 
 class ReqyTest extends TestCase
 {
@@ -472,6 +474,35 @@ class ReqyTest extends TestCase
             'name' => 'Lamborghini'
         ]);
         self::assertEmpty($issues);
+    }
+
+    public function testIssueContainsBadValue()
+    {
+        $issues = $this->reqy->validate(['age' => 23], [
+            'age' => 35
+        ]);
+        self::assertNotEmpty($issues);
+        self::assertEquals(23, $issues[0]->getValue());
+    }
+
+    public function testIssueToString()
+    {
+        $issue = new Issue(IssueLevel::$ERROR, 'name', 'details');
+        self::assertEquals('[ERROR] name: details', (string)$issue);
+
+        $issue = new Issue(IssueLevel::$ERROR, 'name', 'details');
+        $issue->setKey('someKey');
+        self::assertEquals('[ERROR] key=someKey name: details', (string)$issue);
+
+        $issue = new Issue(IssueLevel::$ERROR, 'name', 'details');
+        $issue->setKey('someKey');
+        $issue->setValue('someValue');
+        self::assertEquals('[ERROR] key=someKey value=someValue name: details', (string)$issue);
+
+        $issue = new Issue(IssueLevel::$ERROR, 'name', 'details');
+        $issue->setKey('someKey');
+        $issue->setValue(['complex' => ['array' => true]]);
+        self::assertEquals('[ERROR] key=someKey value={"complex":{"array":true}} name: details', (string)$issue);
     }
 }
 

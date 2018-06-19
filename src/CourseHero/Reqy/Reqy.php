@@ -243,16 +243,14 @@ class Reqy
             } else {
                 /** @var Validator $validator */
                 $validator = $req;
-
                 $preprocess = $validator->getPreprocess();
-                if ($preprocess) {
-                    $value = $preprocess($value);
-                }
-
                 $predicate = $validator->getPredicate();
-                $result = $predicate($value);
+                $result = $predicate($preprocess ? $preprocess($value) : $value);
                 if ($result !== true) {
-                    $issues[] = new Issue($validator->getLevel(), $keyConcat, $validator->getName(), $result);
+                    $issue = new Issue($validator->getLevel(), $validator->getName(), $result);
+                    $issue->setKey($keyConcat);
+                    $issue->setValue($value);
+                    $issues[] = $issue;
                 }
             }
         }

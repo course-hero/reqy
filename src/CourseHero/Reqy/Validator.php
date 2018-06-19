@@ -23,7 +23,7 @@ class Validator
      * @param \Closure $predicate
      * @param \Closure $preprocess
      */
-    public function __construct($name, IssueLevel $level, \Closure $predicate, \Closure $preprocess = null)
+    public function __construct(string $name, IssueLevel $level, \Closure $predicate, \Closure $preprocess = null)
     {
         $this->setName($name);
         $this->setLevel($level);
