@@ -114,7 +114,7 @@ class Reqy
             if (is_null($value)) {
                 return "expected length to be in range ($min, $max), but value is missing";
             }
-            
+
             $len = $this->getLength($value);
             return $this->validateRange('length', $len, $min, $max);
         });
@@ -284,7 +284,11 @@ class Reqy
      */
     protected function resolve($object, $key)
     {
-        if (key_exists($key, $object)) {
+        $keyUcFirst = ucfirst($key);
+        $getterFn = "get$keyUcFirst";
+        if (is_object($object) && method_exists($object, $getterFn)) {
+            return $object->$getterFn();
+        } elseif (is_array($object) && array_key_exists($key, $object)) {
             return $object[$key];
         } else {
             return null;
