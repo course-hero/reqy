@@ -437,6 +437,6 @@ class ReqyTest extends TestCase
         $errors = $this->reqy->validate([], [
             'cats' => $this->reqy->lengthRange(1, 3)
         ]);
-        self::assertEquals('expected length to be 2, but value is missing', $errors[0]->getDetails());
+        self::assertEquals('expected length to be in range (1, 3), but value is missing', $errors[0]->getDetails());
     }
 }
